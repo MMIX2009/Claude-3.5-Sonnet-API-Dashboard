@@ -1,7 +1,10 @@
 import streamlit as st
 import os
 import anthropic
-import pyttsx3
+from gtts import gTTS
+import base64
+from io import BytesIO
+# import pyttsx3
 
 ANTHROPIC_API_KEY = "*************************************"
 # Initialize Anthropic client
@@ -11,7 +14,7 @@ client = anthropic.Client(api_key=ANTHROPIC_API_KEY)
 
 
 # Initialize text-to-speech engine
-tts_engine = pyttsx3.init()
+# tts_engine = pyttsx3.init()
 
 # Streamlit app layout
 st.set_page_config(page_title="Claude 3.5 Dashboard", layout="wide")
@@ -89,14 +92,26 @@ with tabs[3]:
             st.write(response)
 
 # Text-to-Speech
+# with tabs[4]:
+#     st.subheader("Text-to-Speech")
+#     tts_text = st.text_area("Enter text to convert to speech")
+#     if st.button("Convert to Speech"):
+#         if tts_text:
+#             tts_engine.say(tts_text)
+#             tts_engine.runAndWait()
+#             st.success("Text converted to speech")
 with tabs[4]:
     st.subheader("Text-to-Speech")
     tts_text = st.text_area("Enter text to convert to speech")
     if st.button("Convert to Speech"):
         if tts_text:
-            tts_engine.say(tts_text)
-            tts_engine.runAndWait()
-            st.success("Text converted to speech")
+            tts = gTTS(tts_text)
+            buffer = BytesIO()
+            tts.save(buffer)
+            buffer.seek(0)
+            audio_base64 = base64.b64encode(buffer.read()).decode()
+            audio_html = f'<audio controls><source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3"></audio>'
+            st.markdown(audio_html, unsafe_allow_html=True)
 
 # Document Comparison
 with tabs[5]:
